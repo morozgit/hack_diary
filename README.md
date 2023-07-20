@@ -4,17 +4,23 @@
 ## Красивый дневник
 Для того чтобы все получилось необходимо положить файл скрипта рядом с manage.py 
 ### Исправление оценок Фролова Ивана Григорьевича
-Запуск Django Shell
-```Linux
-python manage.py shell
+В manage.py импортировать командой файл hack_diary.py
+```python
+import hack_diary
 ```
-Скоприровать в Django Shell
+## Запуск
 ```python 
-from datacenter.models import Schoolkid
-from datacenter.models import Mark
-ivan = Schoolkid.objects.get(full_name__contains="Фролов Иван Григорьевич")
-child = Mark.objects.filter(schoolkid=ivan, points__lte=3)
+python3 manage.py runserver
 ```
+## Использование
+Ввести ФИО ученика и предмет по которому необходимо сделать похвалу.
+
+## Результат
+1. Оценки исправлены
+1. Жалобы исчезли
+1. Появилась похвала от учителя
+
+
 
 
  
