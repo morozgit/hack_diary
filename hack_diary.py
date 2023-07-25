@@ -14,7 +14,7 @@ from datacenter.models import Commendation
 from datacenter.models import Teacher
 
 
-PRAISE  = ['Молодец!',
+LAUDATORY_PHRASES  = ['Молодец!',
            'Это как раз то, что нужно!',
            'Ты на верном пути!',
            'Ты многое сделал, я это вижу!']
@@ -30,21 +30,32 @@ def remove_chastisements(schoolkid):
     chastisement.delete()
 
 
-def create_commendation(schoolkid, subject):
+def get_shoolchild(schoolkid):
     try:
-    	schoolchild = Schoolkid.objects.get(full_name__contains=schoolkid)
-    except MultipleObjectsReturned:
-        print('Найдено больше одного. Введите ФИО')
-    except ObjectDoesNotExist:
-        print('Не найдено такого имени')
-    class_lesson = Lesson.objects.filter(subject__title__contains=subject,
-                                         year_of_study__contains=6,
-                                         group_letter__contains="А").order_by('year_of_study').first()
-    Commendation.objects.create(text=random.choice(PRAISE),
-                                created=class_lesson.date,
-                                schoolkid=schoolchild,
-                                subject=class_lesson.subject,
-                                teacher=class_lesson.teacher)
+        schoolchild = Schoolkid.objects.get(full_name__contains=schoolkid)
+    except Schoolkid.MultipleObjectsReturned:
+        schoolchild = Schoolkid.objects.get(full_name__contains=schoolkid).first()
+    except Schoolkid.DoesNotExist:
+        schoolchild = None
+    return schoolchild
+
+
+def create_commendation(schoolkid, subject):
+    schoolchild = get_shoolchild(schoolkid)
+    if schoolchild:
+        class_lesson = Lesson.objects.filter(subject__title__contains=subject,
+                                            year_of_study=schoolchild.year_of_study,
+                                            group_letter=schoolchild.group_letter).order_by('?').first()
+    else:
+        print('Ученик не найден. Поробуйте поискать другого')
+    if class_lesson:
+        Commendation.objects.create(text=random.choice(LAUDATORY_PHRASES),
+                                    created=class_lesson.date,
+                                    schoolkid=schoolchild,
+                                    subject=class_lesson.subject,
+                                    teacher=class_lesson.teacher)
+    else:
+        print('Предмет не найден. Поробуйте ввести другой')
     remove_chastisements(schoolkid)
 
 
