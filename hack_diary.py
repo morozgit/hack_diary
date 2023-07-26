@@ -1,7 +1,6 @@
 import django
-from django.core.exceptions import ObjectDoesNotExist
-from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
+from django.db.models.query import QuerySet
 import random
 settings.configure()
 django.setup()
@@ -34,7 +33,7 @@ def get_shoolchild(schoolkid):
     try:
         schoolchild = Schoolkid.objects.get(full_name__contains=schoolkid)
     except Schoolkid.MultipleObjectsReturned:
-        schoolchild = Schoolkid.objects.get(full_name__contains=schoolkid).first()
+        schoolchild = Schoolkid.objects.filter(full_name__contains=schoolkid)
     except Schoolkid.DoesNotExist:
         schoolchild = None
     return schoolchild
@@ -42,10 +41,12 @@ def get_shoolchild(schoolkid):
 
 def create_commendation(schoolkid, subject):
     schoolchild = get_shoolchild(schoolkid)
-    if schoolchild:
+    if isinstance(schoolchild, Schoolkid):
         class_lesson = Lesson.objects.filter(subject__title__contains=subject,
                                             year_of_study=schoolchild.year_of_study,
                                             group_letter=schoolchild.group_letter).order_by('?').first()
+    elif isinstance(schoolchild, QuerySet):
+        print('Найдено больше одного ученика{0}. Уточните свой выбор'.format(schoolchild))
     else:
         print('Ученик не найден. Поробуйте поискать другого')
     if class_lesson:
